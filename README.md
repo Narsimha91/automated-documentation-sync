@@ -1,3 +1,19 @@
-# automated-documentation-sync
+# Automated Documentation Sync
 
-https://narasing81.atlassian.net/wiki/x/AQABAQ
+A Python project that demonstrates automatic README documentation updates when important source-code changes are made.
+
+## Features
+
+<!-- AUTO-GENERATED-FEATURES:START -->
+
+- Addition
+- Subtraction
+- Multiplication
+
+<!-- AUTO-GENERATED-FEATURES:END -->
+## Testing
+
+Run the test suite with:
+
+```bash
+python -m pytest -q

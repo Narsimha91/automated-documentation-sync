@@ -27,3 +27,7 @@ jobs:
 
       - name: Run pytest
         run: pytest -q
+
+      - name: Update README
+        run: |
+          python -c "from src.automated_documentation_sync.sync import sync_readme; sync_readme()"
