@@ -6,4 +6,5 @@ FEATURES = [
     "Multiplication",
     "Division",
     "Processing",
+    "Feature 1",
 ]
