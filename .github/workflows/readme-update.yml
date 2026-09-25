@@ -6,64 +6,86 @@ on:
       - main
       - master
     paths:
-      - 'src/**'
+      - "src/**"
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  test-source-change:
+  update-readme:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout source code
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # 2. Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
+      # 3. Install project and test dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[dev]
+          pip install -e ".[dev]"
 
+      # 4. Run all tests before changing README
       - name: Run pytest
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: pytest -q
 
+      # 5. Update README from the current source features
       - name: Update README
         run: |
-          python -c "from src.automated_documentation_sync.sync import sync_readme; sync_readme()"
+          python -c "from automated_documentation_sync.sync import sync_readme; sync_readme()"
 
+      # 6. Check whether README actually changed
       - name: Check for README changes
         id: readme-check
         run: |
           if git diff --quiet -- README.md; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "README has no changes."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "README has changed."
+            git diff -- README.md
           fi
 
+      # 7. Create a unique branch for this README update
       - name: Create README update branch
         if: steps.readme-check.outputs.changed == 'true'
         run: |
-          git checkout -b automated/readme-update
+          BRANCH_NAME="automated/readme-update-${GITHUB_RUN_ID}"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH_NAME"
 
-      - name: Commit README update
+      # 8. Configure Git identity
+      - name: Configure Git
         if: steps.readme-check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "docs: update README from source changes"
 
+      # 9. Commit README changes
+      - name: Commit README update
+        if: steps.readme-check.outputs.changed == 'true'
+        run: |
+          git add README.md
+          git commit -m "docs: update README automatically"
+
+      # 10. Push the unique branch
       - name: Push README update branch
         if: steps.readme-check.outputs.changed == 'true'
         run: |
-          git push --force-with-lease origin automated/readme-update
+          git push origin "$BRANCH_NAME"
 
+      # 11. Create Pull Request
       - name: Create Pull Request
         if: steps.readme-check.outputs.changed == 'true'
         env:
@@ -71,6 +93,6 @@ jobs:
         run: |
           gh pr create \
             --base main \
-            --head automated/readme-update \
+            --head "$BRANCH_NAME" \
             --title "docs: update README automatically" \
-            --body "This pull request was automatically created by GitHub Actions after a source-code change. Tests passed before the README was updated."
+            --body "This pull request was automatically created after a source-code change. All automated tests passed before the README was updated."

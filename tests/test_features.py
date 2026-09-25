@@ -7,4 +7,4 @@ def test_features_list_is_available():
 
 
 def test_features_contains_expected_capstone_features():
-    assert FEATURES == ["Addition", "Subtraction", "Multiplication", "Division", "Processing", "Feature 1" ]
+    assert FEATURES == ["Addition", "Subtraction", "Multiplication", "Division", "Processing", "Feature 1", "Feature 2"]

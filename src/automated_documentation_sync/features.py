@@ -7,4 +7,5 @@ FEATURES = [
     "Division",
     "Processing",
     "Feature 1",
+    "Feature 2"
 ]
