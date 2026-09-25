@@ -9,6 +9,10 @@ A Python project that demonstrates automatic README documentation updates when i
 - Addition
 - Subtraction
 - Multiplication
+- Division
+- Processing
+- Feature 1
+- Feature 2
 
 <!-- AUTO-GENERATED-FEATURES:END -->
 ## Testing
