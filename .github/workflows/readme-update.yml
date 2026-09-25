@@ -4,8 +4,13 @@ on:
   push:
     branches:
       - main
+      - master
     paths:
       - 'src/**'
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   test-source-change:
@@ -31,3 +36,41 @@ jobs:
       - name: Update README
         run: |
           python -c "from src.automated_documentation_sync.sync import sync_readme; sync_readme()"
+
+      - name: Check for README changes
+        id: readme-check
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create README update branch
+        if: steps.readme-check.outputs.changed == 'true'
+        run: |
+          git checkout -b automated/readme-update
+
+      - name: Commit README update
+        if: steps.readme-check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update README from source changes"
+
+      - name: Push README update branch
+        if: steps.readme-check.outputs.changed == 'true'
+        run: |
+          git push --force-with-lease origin automated/readme-update
+
+      - name: Create Pull Request
+        if: steps.readme-check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base main \
+            --head automated/readme-update \
+            --title "docs: update README automatically" \
+            --body "This pull request was automatically created by GitHub Actions after a source-code change. Tests passed before the README was updated."
