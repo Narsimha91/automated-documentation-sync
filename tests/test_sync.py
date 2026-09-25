@@ -24,6 +24,7 @@ def test_sync_readme_writes_current_features_to_generated_section(tmp_path):
     assert "- Subtraction" in result
     assert "- Multiplication" in result
     assert "- Division" in result
+    assert "- Processing" in result
     assert "- Old feature" not in result
     assert "## Usage" in result
     assert "Run the app." in result

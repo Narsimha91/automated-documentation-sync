@@ -4,5 +4,6 @@ FEATURES = [
     "Addition",
     "Subtraction",
     "Multiplication",
-    "Division"
+    "Division",
+    "Processing",
 ]
